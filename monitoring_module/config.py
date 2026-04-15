@@ -8,6 +8,7 @@ class MonitoringConfig:
     tier: int
     app_id: str
     secret_hash: str           # SHA-256 do MONITORING_SECRET gerado pelo cliente
+    secret: str                # MONITORING_SECRET em texto claro — necessário para verificar HMAC
     hub_url: str
     allowed_ips: list[str]     # vazio = bloqueia tudo
     db_provider: str | None    # supabase | firestore | postgres | mongodb | None
@@ -23,6 +24,7 @@ class MonitoringConfig:
             raise ValueError("MONITORING_TIER deve ser um inteiro (1, 2 ou 3)")
         app_id = os.getenv("MONITORING_APP_ID", "").strip()
         secret_hash = os.getenv("MONITORING_SECRET_HASH", "")
+        secret = os.getenv("MONITORING_SECRET", "")
         hub_url = os.getenv("MONITORING_HUB_URL", "")
         allowed_ips_raw = os.getenv("MONITORING_ALLOWED_IPS", "")
         allowed_ips = [ip.strip() for ip in allowed_ips_raw.split(",") if ip.strip()]
@@ -44,6 +46,7 @@ class MonitoringConfig:
             tier=tier,
             app_id=app_id,
             secret_hash=secret_hash,
+            secret=secret,
             hub_url=hub_url,
             allowed_ips=allowed_ips,
             db_provider=db_provider,
