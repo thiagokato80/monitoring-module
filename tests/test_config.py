@@ -41,3 +41,25 @@ def test_maintenance_mode_default_false(monkeypatch):
 
     cfg = MonitoringConfig.from_env()
     assert cfg.maintenance_mode is False
+
+
+def test_from_env_tier2_with_db(monkeypatch):
+    monkeypatch.setenv("MONITORING_TIER", "2")
+    monkeypatch.setenv("MONITORING_APP_ID", "test-app")
+    monkeypatch.setenv("DB_PROVIDER", "supabase")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://localhost/test")
+
+    cfg = MonitoringConfig.from_env()
+
+    assert cfg.tier == 2
+    assert cfg.db_provider == "supabase"
+    assert cfg.database_url == "postgresql://localhost/test"
+
+
+def test_from_env_tier2_missing_database_url(monkeypatch):
+    monkeypatch.setenv("MONITORING_TIER", "2")
+    monkeypatch.setenv("MONITORING_APP_ID", "test-app")
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+
+    with pytest.raises(ValueError, match="DATABASE_URL"):
+        MonitoringConfig.from_env()
