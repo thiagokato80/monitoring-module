@@ -6,6 +6,7 @@ from monitoring_module.config import MonitoringConfig
 def test_from_env_tier1(monkeypatch):
     monkeypatch.setenv("MONITORING_TIER", "1")
     monkeypatch.setenv("MONITORING_APP_ID", "test-app")
+    monkeypatch.setenv("MONITORING_SECRET", "my-secret")
     monkeypatch.setenv("MONITORING_SECRET_HASH", "abc123")
     monkeypatch.setenv("MONITORING_HUB_URL", "http://hub/ingest")
     monkeypatch.setenv("MONITORING_ALLOWED_IPS", "1.2.3.4,5.6.7.8")
@@ -37,6 +38,7 @@ def test_from_env_invalid_tier(monkeypatch):
 def test_maintenance_mode_default_false(monkeypatch):
     monkeypatch.setenv("MONITORING_TIER", "1")
     monkeypatch.setenv("MONITORING_APP_ID", "test-app")
+    monkeypatch.setenv("MONITORING_SECRET", "my-secret")
     monkeypatch.delenv("MAINTENANCE_MODE", raising=False)
 
     cfg = MonitoringConfig.from_env()
@@ -46,6 +48,7 @@ def test_maintenance_mode_default_false(monkeypatch):
 def test_from_env_tier2_with_db(monkeypatch):
     monkeypatch.setenv("MONITORING_TIER", "2")
     monkeypatch.setenv("MONITORING_APP_ID", "test-app")
+    monkeypatch.setenv("MONITORING_SECRET", "my-secret")
     monkeypatch.setenv("DB_PROVIDER", "supabase")
     monkeypatch.setenv("DATABASE_URL", "postgresql://localhost/test")
 
@@ -59,7 +62,17 @@ def test_from_env_tier2_with_db(monkeypatch):
 def test_from_env_tier2_missing_database_url(monkeypatch):
     monkeypatch.setenv("MONITORING_TIER", "2")
     monkeypatch.setenv("MONITORING_APP_ID", "test-app")
+    monkeypatch.setenv("MONITORING_SECRET", "my-secret")
     monkeypatch.delenv("DATABASE_URL", raising=False)
 
     with pytest.raises(ValueError, match="DATABASE_URL"):
+        MonitoringConfig.from_env()
+
+
+def test_from_env_missing_secret(monkeypatch):
+    monkeypatch.setenv("MONITORING_TIER", "1")
+    monkeypatch.setenv("MONITORING_APP_ID", "test-app")
+    monkeypatch.delenv("MONITORING_SECRET", raising=False)
+
+    with pytest.raises(ValueError, match="MONITORING_SECRET"):
         MonitoringConfig.from_env()

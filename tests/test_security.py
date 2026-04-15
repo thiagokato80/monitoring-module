@@ -8,7 +8,6 @@ from monitoring_module.security import verify_hmac_with_secret, is_ip_allowed
 
 
 SECRET = "test-secret-key"
-SECRET_HASH = hashlib.sha256(SECRET.encode()).hexdigest()
 APP_ID = "test-app"
 
 

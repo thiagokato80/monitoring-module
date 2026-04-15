@@ -39,6 +39,8 @@ class MonitoringConfig:
             raise ValueError("MONITORING_APP_ID é obrigatório")
         if tier not in (1, 2, 3):
             raise ValueError("MONITORING_TIER deve ser 1, 2 ou 3")
+        if not secret:
+            raise ValueError("MONITORING_SECRET é obrigatório")
         if tier >= 2 and not database_url:
             raise ValueError("DATABASE_URL é obrigatório para MONITORING_TIER >= 2")
 
