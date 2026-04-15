@@ -1,4 +1,5 @@
 # monitoring_module/middleware.py
+import threading
 import traceback
 from datetime import datetime, timezone
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -54,7 +55,7 @@ class ErrorLoggingMiddleware(BaseHTTPMiddleware):
             self._send_error_event(
                 request=request,
                 status_code=response.status_code,
-                error_type="HTTPException",
+                error_type="HTTP5xxResponse",
                 stack_trace="",
             )
         return response
@@ -76,4 +77,9 @@ class ErrorLoggingMiddleware(BaseHTTPMiddleware):
                 # NEVER include: request body, auth headers, user data
             },
         }
-        send_event(event, self.config.hub_url, self.config.app_id, self.config.secret)
+        t = threading.Thread(
+            target=send_event,
+            args=(event, self.config.hub_url, self.config.app_id, self.config.secret),
+            daemon=True,
+        )
+        t.start()

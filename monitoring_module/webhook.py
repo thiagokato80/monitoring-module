@@ -3,7 +3,6 @@ import hashlib
 import hmac
 import json
 import time
-from datetime import datetime, timezone
 
 
 def send_event(event: dict, hub_url: str, app_id: str, secret: str) -> None:
@@ -29,11 +28,15 @@ def send_event(event: dict, hub_url: str, app_id: str, secret: str) -> None:
     }
 
     try:
-        import httpx
-        with httpx.Client(timeout=5.0) as client:
-            client.post(hub_url, content=body, headers=headers)
-    except Exception:
-        pass  # falha silenciosa — monitoramento não deve derrubar a app
+        _blocking_post(hub_url, body, headers)
+    except BaseException:
+        pass  # fire-and-forget — never impacts the app
+
+
+def _blocking_post(hub_url: str, body: bytes, headers: dict) -> None:
+    import httpx
+    with httpx.Client(timeout=5.0) as client:
+        client.post(hub_url, content=body, headers=headers)
 
 
 def _serialize(event: dict) -> bytes:
