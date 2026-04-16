@@ -41,12 +41,29 @@ def test_health_uptime_increases():
     assert r2 >= r1
 
 
-def test_ping_requires_hmac():
-    """POST /monitoring/ping sem assinatura deve retornar 403."""
+def test_ping_requires_valid_ip():
+    """POST /monitoring/ping from blocked IP should return 403."""
     from monitoring_module.routes.monitoring import make_monitoring_router
-    cfg = make_config()
+    cfg = make_config()  # allowed_ips=[]
     app = FastAPI()
     app.include_router(make_monitoring_router(cfg))
     client = TestClient(app)
+    resp = client.post("/monitoring/ping")
+    assert resp.status_code == 403
+
+
+def test_ping_requires_hmac():
+    """POST /monitoring/ping with valid IP but no HMAC should return 403."""
+    from monitoring_module.routes.monitoring import make_monitoring_router
+    cfg = MonitoringConfig(
+        tier=1, app_id="test-app", secret="sec", secret_hash="h",
+        hub_url="", allowed_ips=["testclient"],  # TestClient uses "testclient" as host
+        maintenance_mode=False, maintenance_message="",
+        db_provider=None, database_url=None,
+    )
+    app = FastAPI()
+    app.include_router(make_monitoring_router(cfg))
+    client = TestClient(app)
+    # No HMAC headers → 403
     resp = client.post("/monitoring/ping")
     assert resp.status_code == 403

@@ -11,9 +11,9 @@ class SupabaseAdapter(DBAdapter):
         try:
             import psycopg2
             start = time.time()
-            conn = psycopg2.connect(self._url, connect_timeout=3)
-            conn.cursor().execute("SELECT 1")
-            conn.close()
+            with psycopg2.connect(self._url, connect_timeout=3) as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT 1")
             return {"status": "ok", "latency_ms": int((time.time() - start) * 1000)}
         except Exception:
             return {"status": "error", "latency_ms": None}
