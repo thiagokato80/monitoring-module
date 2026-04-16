@@ -1,7 +1,11 @@
 # monitoring_module/routes/monitoring.py
 from fastapi import APIRouter, Request, HTTPException
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from monitoring_module.config import MonitoringConfig
 from monitoring_module.security import verify_hmac_with_secret, is_ip_allowed
+
+limiter = Limiter(key_func=get_remote_address)
 
 
 def make_monitoring_router(config: MonitoringConfig) -> APIRouter:
@@ -18,6 +22,7 @@ def make_monitoring_router(config: MonitoringConfig) -> APIRouter:
             raise HTTPException(403, "Assinatura inválida")
 
     @router.post("/ping")
+    @limiter.limit("10/minute")
     async def ping(request: Request):
         _require_auth(request)
         return {"pong": True, "app_id": config.app_id}
