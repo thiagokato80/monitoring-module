@@ -17,7 +17,7 @@ def make_health_router(config: MonitoringConfig) -> APIRouter:
             "tier": config.tier,
             "app_id": config.app_id,
             "uptime_seconds": int(time.time() - start_time),
-            "version": "1.0.0",
+            "version": "1.0.1",
         }
         if db_adapter:
             db_result = db_adapter.check()
