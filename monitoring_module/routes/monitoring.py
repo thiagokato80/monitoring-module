@@ -9,7 +9,7 @@ limiter = Limiter(key_func=get_remote_address)
 
 
 def make_monitoring_router(config: MonitoringConfig) -> APIRouter:
-    router = APIRouter(prefix="/monitoring")
+    router = APIRouter()
 
     def _require_auth(request: Request, body: bytes = b""):
         client_ip = request.client.host if request.client else ""
