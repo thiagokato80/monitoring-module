@@ -32,7 +32,10 @@ def verify_hmac_with_secret(
 
 
 def is_ip_allowed(client_ip: str, allowed_ips: list[str]) -> bool:
-    """Retorna False se allowed_ips estiver vazio (nega tudo por padrão)."""
+    """
+    Retorna True se allowed_ips estiver vazio (desabilita whitelist de IP).
+    Caso contrário, verifica se o IP está na lista.
+    """
     if not allowed_ips:
-        return False
+        return True
     return client_ip in allowed_ips
